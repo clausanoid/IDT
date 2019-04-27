@@ -23,17 +23,18 @@ chart.render();
     setTimeout(function()
 {
     $.ajax({
-        type: "POST",
-        url: "http://localhost/sensor",
+        type: "GET",
+        url: "http://localhost:5000/datos",
         success: function(respuesta){
           $('.center-div').html(respuesta); // vamos a escribir en el centro el valor de nuestra lectura
+
           // Agregamos puntos a nuestra tabla a partir de los valores que recibimos del arduino
           /* dps.push({
 			y: respuesta
 		}) */
 
 
-    });
+    }});
 }, 10000); // Haremos una solicitud cada 10 segundos
 
 

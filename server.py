@@ -3,10 +3,13 @@ from flask import Response
 import json  # la libreria json nos permite convertir texto a json para consumir en cualquier lenguaje compatible
 from time import sleep  # usamos la libreria sleep para darle tiempo a la tarjeta arduino de reiniciarse
 import serial, time  # usamos la libreria serial para hacer la comunicacion a puerto serial
+from flask_cors import CORS
+
+
 
 # configuramos nuestra aplicacion para que inicie en cuanto usemos el comando run
 app = Flask(__name__)
-
+CORS(app)
 
 # creamos una ruta , que tomara el nombre de la pagina html y la mostrara ejemplo: http://localhost/sensor.html
 @app.route('/<string:page_name>/')
@@ -16,8 +19,8 @@ def render_static(page_name):
 
 
 # Creamos una ruta que nos regrese json con el status que muestra el sensor de nuestro arduino
-@app.route('/sensor', methods=['GET'])
-def api_sensor():
+@app.route('/datos', methods=['GET'])
+def api_datos():
     # nos conectamos al puerto serial de nuestro equipo
     arduino = serial.Serial('COM3', baudrate=9600, timeout=1.0)
     # Nota: provocamos un reseteo manual de la placa para leer desde
@@ -29,17 +32,19 @@ def api_sensor():
     # En Python 3 esta función devuelve un objeto bytes, ver
     # http://docs.python.org/3/library/stdtypes.html#typebytes
     line = arduino.readline()
+    line = arduino.readline()
+
     # Con errors='replace' se evitan problemas con bytes erróneos, ver
-    # http://docs.python.org/3/library/stdtypes.html#bytes.decode
-    # Con end='' se evita un doble salto de línea
-    print(line.decode('ascii', errors='replace'), end='')
+        # http://docs.python.org/3/library/stdtypes.html#bytes.decode
+        # Con end='' se evita un doble salto de línea
+    mensaje = line.decode('ascii', errors='replace')
+
     # se muestra la informacion en json cada que hacemos una solicitud a nuestro endpoint
     data = {
-        'mensaje': str(line.decode('ascii', errors='replace'), end='')
-
+        'mensaje': mensaje
     }
     js = json.dumps(data)
     resp = Response(js, status=200, mimetype='application/json')
-    resp.headers['Link'] = 'http://localhost'
+    resp.headers['Link'] = 'http://localhost:5000'
 
     return resp
